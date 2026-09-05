@@ -375,18 +375,7 @@ export default function Cart() {
 
                 </div>
 
-                {/* PRICE NOTICE */}
-
-                <div className="mt-6 rounded-2xl border border-[#E6D5B8] bg-[#F8F0E3] p-4">
-
-                  <p className="text-xs leading-5 text-[#70552E]">
-                    Final price and product availability
-                    will be confirmed before order
-                    confirmation.
-                  </p>
-
-                </div>
-
+                
                 {/* CHECKOUT */}
 
                 <a
