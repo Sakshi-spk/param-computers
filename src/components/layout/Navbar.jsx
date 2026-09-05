@@ -22,6 +22,11 @@ import {
   WISHLIST_UPDATED_EVENT,
 } from "../../lib/wishlist";
 
+import {
+  getCartItemCount,
+  CART_UPDATED_EVENT,
+} from "../../lib/cart";
+
 
 /*
  * ============================================================
@@ -77,6 +82,11 @@ function Navbar() {
   const [wishlistCount, setWishlistCount] =
     useState(
       () => getWishlistIds().length
+    );
+
+  const [cartCount, setCartCount] =
+    useState(
+      () => getCartItemCount()
     );
 
 
@@ -143,6 +153,90 @@ function Navbar() {
       window.removeEventListener(
         WISHLIST_UPDATED_EVENT,
         updateWishlistCount
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleStorageChange
+      );
+
+      window.removeEventListener(
+        "focus",
+        handleFocus
+      );
+
+    };
+
+  }, []);
+
+
+  /*
+   * ==========================================================
+   * CART COUNT SYNCHRONIZATION
+   * ==========================================================
+   */
+
+  useEffect(() => {
+
+    function updateCartCount(event) {
+      const cart =
+        event.detail?.cart;
+
+      if (Array.isArray(cart)) {
+        setCartCount(
+          cart.reduce(
+            (total, item) =>
+              total + item.quantity,
+            0
+          )
+        );
+      } else {
+        setCartCount(
+          getCartItemCount()
+        );
+      }
+    }
+
+
+    function handleStorageChange(event) {
+      if (
+        event.key === "param_computers_cart"
+      ) {
+        setCartCount(
+          getCartItemCount()
+        );
+      }
+    }
+
+
+    function handleFocus() {
+      setCartCount(
+        getCartItemCount()
+      );
+    }
+
+
+    window.addEventListener(
+      CART_UPDATED_EVENT,
+      updateCartCount
+    );
+
+    window.addEventListener(
+      "storage",
+      handleStorageChange
+    );
+
+    window.addEventListener(
+      "focus",
+      handleFocus
+    );
+
+
+    return () => {
+
+      window.removeEventListener(
+        CART_UPDATED_EVENT,
+        updateCartCount
       );
 
       window.removeEventListener(
@@ -340,17 +434,18 @@ function Navbar() {
             LOGO
         =================================================== */}
 
-       <a
-  href="/"
-  onClick={closeMenu}
-  className="shrink-0"
->
-  <img
-    src="/param-logo-light.png"
-    alt="Param Computers"
-    className="h-auto w-[170px] object-contain sm:w-[190px]"
-  />
-</a>
+        <a
+          href="/"
+          onClick={closeMenu}
+          className="shrink-0"
+        >
+          <img
+            src="/param-logo-light.png"
+            alt="Param Computers"
+            className="h-auto w-[170px] object-contain sm:w-[190px]"
+          />
+        </a>
+
 
         {/* ===================================================
             DESKTOP NAVIGATION
@@ -716,6 +811,30 @@ function Navbar() {
             <ShoppingCart size={18} />
 
             Cart
+
+            {cartCount > 0 && (
+
+              <span
+                className="
+                  ml-1
+                  inline-flex
+                  min-w-[22px]
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#0F2B5B]
+                  px-1.5
+                  py-0.5
+                  text-[11px]
+                  font-bold
+                  leading-none
+                  text-white
+                "
+              >
+                {cartCount}
+              </span>
+
+            )}
 
           </a>
 
@@ -1323,7 +1442,7 @@ function Navbar() {
               className="
                 flex
                 items-center
-                gap-3
+                justify-between
                 border-b
                 border-[#EEF1F5]
                 py-4
@@ -1335,9 +1454,36 @@ function Navbar() {
               "
             >
 
-              <ShoppingCart size={19} />
+              <span className="flex items-center gap-3">
 
-              Shopping Cart
+                <ShoppingCart size={19} />
+
+                Shopping Cart
+
+              </span>
+
+
+              {cartCount > 0 && (
+
+                <span
+                  className="
+                    inline-flex
+                    min-w-[24px]
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-[#0F2B5B]
+                    px-2
+                    py-1
+                    text-[11px]
+                    font-bold
+                    text-white
+                  "
+                >
+                  {cartCount}
+                </span>
+
+              )}
 
             </a>
 

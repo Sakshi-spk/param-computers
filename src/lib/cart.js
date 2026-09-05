@@ -1,4 +1,5 @@
 const CART_STORAGE_KEY = "param_computers_cart";
+export const CART_UPDATED_EVENT = "param_cart_updated";
 
 export function getLocalCart() {
   try {
@@ -22,6 +23,12 @@ export function saveLocalCart(cart) {
     localStorage.setItem(
       CART_STORAGE_KEY,
       JSON.stringify(cart)
+    );
+
+    window.dispatchEvent(
+      new CustomEvent(CART_UPDATED_EVENT, {
+        detail: { cart },
+      })
     );
 
     return cart;
@@ -70,15 +77,14 @@ export function removeFromCart(productId) {
 export function updateCartQuantity(productId, quantity) {
   const cart = getLocalCart();
 
-  const updatedCart = cart
-    .map((item) =>
-      item.product_id === productId
-        ? {
-            ...item,
-            quantity: Math.max(1, quantity),
-          }
-        : item
-    );
+  const updatedCart = cart.map((item) =>
+    item.product_id === productId
+      ? {
+          ...item,
+          quantity: Math.max(1, quantity),
+        }
+      : item
+  );
 
   saveLocalCart(updatedCart);
 
@@ -87,6 +93,12 @@ export function updateCartQuantity(productId, quantity) {
 
 export function clearCart() {
   localStorage.removeItem(CART_STORAGE_KEY);
+
+  window.dispatchEvent(
+    new CustomEvent(CART_UPDATED_EVENT, {
+      detail: { cart: [] },
+    })
+  );
 }
 
 export function getCartItemCount() {
