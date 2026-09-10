@@ -322,14 +322,22 @@ export default function Checkout() {
       );
 
       // -----------------------------------------------------
+      // CREATE ORDER ID
+      // -----------------------------------------------------
+      // Generate the order UUID in the browser so checkout does not
+      // need SELECT access to the orders table just to get its ID.
+      const orderId = crypto.randomUUID();
+
+      // -----------------------------------------------------
       // INSERT ORDER
       // -----------------------------------------------------
 
       const orderResult = await supabase
         .from("orders")
-        .insert(newOrder)
-        .select("id, order_number")
-        .single();
+        .insert({
+          ...newOrder,
+          id: orderId,
+        });
 
       if (orderResult.error) {
         console.error(
@@ -373,15 +381,9 @@ export default function Checkout() {
         return;
       }
 
-      const createdOrder =
-        orderResult.data;
-
-      const orderId =
-        createdOrder.id;
-
       console.log(
         "ORDER CREATED:",
-        createdOrder
+        orderId
       );
 
       console.log(
