@@ -6,6 +6,7 @@ import {
   Loader2,
   Plus,
   Trash2,
+  Video,
 } from "lucide-react";
 
 import { supabase } from "../lib/supabase";
@@ -29,6 +30,9 @@ export default function AddProduct() {
 
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+
+  const [videoFiles, setVideoFiles] = useState([]);
+  const [videoPreviews, setVideoPreviews] = useState([]);
 
   const [specifications, setSpecifications] = useState([
     { key: "", value: "" },
@@ -223,6 +227,76 @@ export default function AddProduct() {
 
   /*
    * ============================================================
+   * VIDEO CHANGE
+   * ============================================================
+   */
+
+  function handleVideoChange(event) {
+    const files = Array.from(event.target.files || []);
+
+    if (files.length === 0) {
+      return;
+    }
+
+    const validFiles = files.filter((file) => {
+      if (!file.type.startsWith("video/")) {
+        return false;
+      }
+
+      if (file.size > 50 * 1024 * 1024) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (validFiles.length !== files.length) {
+      setErrorMessage(
+        "Only video files up to 50 MB each can be uploaded."
+      );
+    } else {
+      setErrorMessage("");
+    }
+
+    const newPreviews = validFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
+
+    setVideoFiles((current) => [
+      ...current,
+      ...validFiles,
+    ]);
+
+    setVideoPreviews((current) => [
+      ...current,
+      ...newPreviews,
+    ]);
+
+    event.target.value = "";
+  }
+
+  /*
+   * ============================================================
+   * REMOVE VIDEO
+   * ============================================================
+   */
+
+  function removeVideo(index) {
+    setVideoFiles((current) =>
+      current.filter(
+        (_, videoIndex) => videoIndex !== index
+      )
+    );
+
+    setVideoPreviews((current) =>
+      current.filter(
+        (_, videoIndex) => videoIndex !== index
+      )
+    );
+  }
+
+  /*
+   * ============================================================
    * ADD SPECIFICATION
    * ============================================================
    */
@@ -329,6 +403,71 @@ export default function AddProduct() {
       if (!publicUrlData?.publicUrl) {
         throw new Error(
           "Unable to create public URL for uploaded image."
+        );
+      }
+
+      uploadedUrls.push(
+        publicUrlData.publicUrl
+      );
+    }
+
+    return uploadedUrls;
+  }
+
+  /*
+   * ============================================================
+   * UPLOAD VIDEOS
+   * ============================================================
+   */
+
+  async function uploadVideos() {
+    const uploadedUrls = [];
+
+    for (
+      let index = 0;
+      index < videoFiles.length;
+      index += 1
+    ) {
+      const file = videoFiles[index];
+
+      const extension =
+        file.name
+          .split(".")
+          .pop()
+          ?.toLowerCase() || "mp4";
+
+      const fileName = `${Date.now()}-video-${index}-${Math.random()
+        .toString(36)
+        .substring(2, 10)}.${extension}`;
+
+      const filePath = `products/videos/${fileName}`;
+
+      const {
+        error: uploadError,
+      } = await supabase.storage
+        .from("product-images")
+        .upload(
+          filePath,
+          file,
+          {
+            cacheControl: "3600",
+            upsert: false,
+          }
+        );
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const {
+        data: publicUrlData,
+      } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+      if (!publicUrlData?.publicUrl) {
+        throw new Error(
+          "Unable to create public URL for uploaded video."
         );
       }
 
@@ -456,6 +595,9 @@ export default function AddProduct() {
       const uploadedImageUrls =
         await uploadImages();
 
+      const uploadedVideoUrls =
+        await uploadVideos();
+
       const mainImageUrl =
         uploadedImageUrls[0];
 
@@ -532,6 +674,9 @@ export default function AddProduct() {
 
         images:
           uploadedImageUrls,
+
+        videos:
+          uploadedVideoUrls,
 
         specifications:
           specificationsObject,
@@ -1005,6 +1150,100 @@ export default function AddProduct() {
                           size={16}
                         />
                       </button>
+
+                    </div>
+
+                  )
+                )}
+
+              </div>
+
+            )}
+
+          </section>
+
+          {/* PRODUCT VIDEOS */}
+
+          <section className="rounded-2xl border border-[#E3E9F1] bg-white p-6">
+
+            <h2 className="text-lg font-bold text-[#0F2B5B]">
+              Product Videos
+            </h2>
+
+            <p className="mt-1 text-sm text-[#718096]">
+              Add product videos to show the actual condition or working of the product.
+            </p>
+
+            <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-6 py-10 text-center transition hover:border-[#0F2B5B] hover:bg-[#F7F9FC]">
+
+              <Video
+                size={36}
+                className="text-[#0F2B5B]"
+              />
+
+              <span className="mt-3 font-semibold text-[#0F2B5B]">
+                Select Product Videos
+              </span>
+
+              <span className="mt-1 text-xs text-[#718096]">
+                Multiple videos allowed • Maximum 50 MB each
+              </span>
+
+              <input
+                type="file"
+                accept="video/*"
+                multiple
+                onChange={
+                  handleVideoChange
+                }
+                className="hidden"
+              />
+
+            </label>
+
+            {videoPreviews.length >
+              0 && (
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+
+                {videoPreviews.map(
+                  (
+                    preview,
+                    index
+                  ) => (
+
+                    <div
+                      key={`${preview}-${index}`}
+                      className="group relative overflow-hidden rounded-xl border border-[#E3E9F1] bg-[#F8FAFC]"
+                    >
+
+                      <video
+                        src={preview}
+                        controls
+                        preload="metadata"
+                        className="aspect-video w-full object-cover"
+                      />
+
+                      <div className="flex items-center justify-between gap-3 px-3 py-3">
+
+                        <span className="text-xs font-semibold text-[#475569]">
+                          Video {index + 1}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeVideo(index)
+                          }
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-red-600 shadow-sm hover:bg-red-50"
+                          title="Remove video"
+                        >
+                          <Trash2
+                            size={16}
+                          />
+                        </button>
+
+                      </div>
 
                     </div>
 
