@@ -423,7 +423,7 @@ function Navbar() {
           max-w-7xl
           items-center
           justify-between
-          gap-3
+          gap-2
           px-4
           lg:px-6
         "
@@ -442,7 +442,7 @@ function Navbar() {
           <img
             src="/param-logo-light.png"
             alt="Param Computers"
-            className="h-auto w-[170px] object-contain sm:w-[190px]"
+            className="h-auto w-[170px] object-contain sm:w-[190px] lg:w-[165px]"
           />
         </a>
 
@@ -455,7 +455,7 @@ function Navbar() {
           className="
             hidden
             items-center
-            gap-4
+            gap-3
             lg:flex
           "
         >
@@ -798,7 +798,7 @@ function Navbar() {
               border
               border-[#D8E0EA]
               bg-white
-              px-3.5
+              px-2.5
               text-sm
               font-semibold
               text-[#334155]
@@ -856,7 +856,7 @@ function Navbar() {
               border
               border-[#D8E0EA]
               bg-white
-              px-3.5
+              px-2.5
               text-sm
               font-semibold
               text-[#334155]
@@ -915,7 +915,7 @@ function Navbar() {
             hidden
             shrink-0
             items-center
-            gap-2
+            gap-1.5
             lg:flex
           "
         >
@@ -939,7 +939,7 @@ function Navbar() {
               border
               border-[#D8E0EA]
               bg-white
-              px-3.5
+              px-2.5
               text-sm
               font-semibold
               text-[#334155]
@@ -972,7 +972,7 @@ function Navbar() {
               gap-2
               rounded-xl
               bg-[#0F2B5B]
-              px-3.5
+              px-2.5
               text-sm
               font-semibold
               text-white
