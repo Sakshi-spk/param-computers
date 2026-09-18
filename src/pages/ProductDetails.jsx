@@ -18,6 +18,7 @@ import {
   Headphones,
   CheckCircle2,
   ExternalLink,
+  Video,
 } from "lucide-react";
 
 import { supabase } from "../lib/supabase";
@@ -35,6 +36,7 @@ export default function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [images, setImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState("");
+  const [videos, setVideos] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const [loading, setLoading] = useState(true);
@@ -218,6 +220,7 @@ export default function ProductDetails() {
       setImages([]);
       setSelectedImage("");
       setSelectedIndex(0);
+      setVideos([]);
       setIsProductWishlisted(false);
       setRelatedProducts([]);
 
@@ -277,6 +280,13 @@ export default function ProductDetails() {
       }
 
       setImages(productImages);
+
+      const productVideos =
+        Array.isArray(data.videos)
+          ? data.videos.filter(Boolean)
+          : [];
+
+      setVideos(productVideos);
 
       if (productImages.length > 0) {
         setSelectedImage(
@@ -838,6 +848,45 @@ export default function ProductDetails() {
                         </button>
                       )
                     )}
+
+                  </div>
+                )}
+
+                {videos.length > 0 && (
+                  <div className="mt-6">
+
+                    <div className="flex items-center gap-2">
+                      <Video
+                        size={18}
+                        className="text-[#C6922F]"
+                      />
+
+                      <h2 className="text-lg font-bold text-[#0F2B5B]">
+                        Product Videos
+                      </h2>
+                    </div>
+
+                    <div className="mt-4 grid gap-4">
+                      {videos.map(
+                        (video, index) => (
+                          <div
+                            key={`${video}-${index}`}
+                            className="overflow-hidden rounded-2xl border border-[#E3E9F1] bg-[#F8FAFC]"
+                          >
+                            <video
+                              src={video}
+                              controls
+                              preload="metadata"
+                              className="max-h-[420px] w-full object-contain"
+                            />
+
+                            <div className="px-4 py-3 text-xs font-semibold text-[#718096]">
+                              Product video {index + 1}
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
 
                   </div>
                 )}
